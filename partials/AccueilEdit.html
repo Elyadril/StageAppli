@@ -1,0 +1,17 @@
+    <button type="button" class="close" ng-click="cancel();">
+        <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
+    </button>
+    <div class="modal-headerb">
+        <h3 class="modal-title">Gestion des agendas</h3>
+    </div>
+    
+	<div class="panel-body">
+	<br/><table class="table table-striped">
+        <tr ng-repeat="agenda in agendas | filter:filtreAgenda | orderBy:'-id'" id="{{agenda.id}}" animate-on-change='c.packing + c.stock + c.price + c.description' ng-animate=" 'animate'">
+        <td>{{agenda.libAgenda}}</td>  
+    </tr>
+	</table>
+            </div>
+        
+    </div>
+
