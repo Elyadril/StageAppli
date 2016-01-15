@@ -62,22 +62,23 @@ $app->post('/agendas', function() use ($app) {
     echoResponse(200, $rows);
 });
 
-$app->put('/products/:id', function($id) use ($app) { 
+$app->put('/agendas/:idAgenda', function($idAgenda) use ($app) { 
     $data = json_decode($app->request->getBody());
-    $condition = array('id'=>$id);
+    $condition = array('idAgenda'=>$idAgenda);
     $mandatory = array();
     global $db;
-    $rows = $db->update("products", $data, $condition, $mandatory);
+    $rows = $db->update("agenda", $data, $condition, $mandatory);
     if($rows["status"]=="success")
-        $rows["message"] = "Product information updated successfully.";
+        $rows["message"] = "Agenda crée !";
     echoResponse(200, $rows);
 });
 
-$app->delete('/Agenda/:id', function($id) { 
+
+$app->delete('/agendas/:idAgenda', function($idAgenda) { 
     global $db;
-    $rows = $db->delete("products", array('id'=>$id));
+    $rows = $db->delete("agenda", array('idAgenda'=>$idAgenda));
     if($rows["status"]=="success")
-        $rows["message"] = "Product removed successfully.";
+        $rows["message"] = "Agenda effacé";
     echoResponse(200, $rows);
 });
 $app->delete('/inscription/:mail/:idRDV' , function($mail,$idRDV) {

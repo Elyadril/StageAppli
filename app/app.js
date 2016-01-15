@@ -10,7 +10,7 @@ app.config(['$routeProvider',
     })
 	.when('/', {
 		title: 'Accueil',
-		templateUrl: 'partials/Accueil.html',
+		templateUrl: 'partials/AccueilLogin.html',
         controller: 'AccueilCtrl'	
 	})
     .otherwise({

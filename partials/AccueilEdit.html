@@ -1,17 +1,65 @@
-    <button type="button" class="close" ng-click="cancel();">
+<button type="button" class="close" ng-click="cancel();">
         <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
     </button>
-    <div class="modal-headerb">
-        <h3 class="modal-title">Gestion des agendas</h3>
+	<div class="panel-heading">
+        <h3 class="modal-title">Gestion des Agendas</h3>
     </div>
     
-	<div class="panel-body">
-	<br/><table class="table table-striped">
-        <tr ng-repeat="agenda in agendas | filter:filtreAgenda | orderBy:'-id'" id="{{agenda.id}}" animate-on-change='c.packing + c.stock + c.price + c.description' ng-animate=" 'animate'">
-        <td>{{agenda.libAgenda}}</td>  
+	<div class="modal-body">
+	<form name="Agenda_form" class="form-horizontal" role="form" novalidate>
+	    <form-element label="Nom Agenda :">
+		   <input type="text" class="form-control" name="NomA" placeholder="Nom de l'agenda" ng-model="agenda.libAgenda" focus required/>
+		</form-element>
+		<form-element label="Mail :">
+		   <input type="text" class="form-control" name="Mail" placeholder="Mail du créateur" ng-model="agenda.mail" required>
+		</form-element>
+		<form-element label="Nombres de jours avant ouverture :">
+		   <input type="text" class="form-control" name="JourO" placeholder="Nombres de jour avant ouverture des inscriptions" ng-model="agenda.nbJourOuverture" only-numbers required>
+		</form-element>
+		<form-element label="Nombres de jours limite:">
+		   <input type="text" class="form-control" name="JourL" placeholder="Nombres de jour limite des inscriptions" ng-model="agenda.nbJourLimite" only-numbers required>
+		</form-element>
+		<form-element label="Inscriptions max :">
+		   <input type="text" class="form-control" name="MaxI" placeholder="Nombres d'inscriptions max par rendez-vous" ng-model="agenda.inscriptionMax" only-numbers required>
+		</form-element><form-element label="Date du jour :">
+		   <input type="datetime" class="form-control" name="DateO" placeholder="Date du jour" ng-model="agenda.dateCreation" 	required>
+		</form-element>	
+		
+		
+		
+		 <div class="space"></div>
+            <div class="space-4"></div>
+            <div class="modal-footer">
+                <form-element label="">
+                    <div class="text-right">
+                        <a class="btn btn-sm" ng-click="cancel()"><i class="ace-icon fa fa-reply"></i>retour	</a>
+                        <button ng-click="saveAgenda(agenda);"
+                                ng-disabled="Agenda_form.$invalid || enableUpdate"
+                                class="btn btn-sm btn-primary"
+                                type="submit">
+                            <i class="ace-icon fa fa-check"></i>Créer agenda
+                        </button>
+                    </div>
+                </form-element>
+            </div>
+	
+	<div class="sw-search" >
+            <div class="nav-search" id="nav-search">
+                    <br/><span class="input-icon">
+                        <input placeholder="Filtrer les agendas ..." class="nav-search-input" ng-model="filtreAgenda.libAgenda" autocomplete="off" type="text" style="width:200px	;">
+                        <i class="search-icon fa fa-search nav-search-icon"></i>
+                    </span>
+            </div>
+        </div>
+	<table class="table table-striped">
+        <tr ng-repeat="agenda in agendas | filter:filtreAgenda | orderBy:'libAgenda'" id="{{agenda.libAgenda}}">
+        <td>{{agenda.libAgenda}}</td>
+        <td style="width:100px">
+		<div class="btn-group">
+        <button type="button" class="btn btn-danger fa fa-trash-o" ng-click="deleteAgenda(agenda.idAgenda);"></button>
+        </div>
+        </td>			
     </tr>
 	</table>
-            </div>
-        
+	</form>
     </div>
-
