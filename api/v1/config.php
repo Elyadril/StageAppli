@@ -5,6 +5,6 @@
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'gestion_rdv');
+define('DB_NAME', 'gestion_rdvF');
 
 ?>

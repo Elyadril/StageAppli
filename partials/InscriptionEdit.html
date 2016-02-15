@@ -1,0 +1,21 @@
+<button type="button" class="close" ng-click="cancel();">
+        <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
+    </button>
+	<div class="panel-heading">
+        <h3 class="modal-title">Inscriptions</h3>
+    </div>
+	<form name="Inscriptions_form" class="form-horizontal" role="form" novalidate>
+	 <form-element label="Nouvelle inscription">
+		   <input type="text" class="form-control" name="mail" ng-disabled="agenda.autoIns" placeholder="email d'inscription" ng-model="mail" focus required/>   
+		   <div class="text-right">
+                        <a class="btn btn-sm" ng-click="cancel()"><i class="ace-icon fa fa-reply"></i>retour</a>
+                        <button ng-click="ajoutInscription(mail);"
+                                ng-disabled="Inscriptions_form.$invalid || enableUpdate"
+                                class="btn btn-sm btn-primary"
+                                type="submit"
+								>
+                            <i class="ace-icon fa fa-check"></i>S'inscrire
+                        </button>
+                    </div>
+		</form-element>
+		</form>

@@ -7,11 +7,12 @@
   <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
   <link rel="stylesheet" href="css/custom.css" type="text/css" />
   <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
-  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/multiple-date-picker.css" type="text/css"/>
+  <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>-->
   <div class="blog-masthead">
       <div class="container">
         <nav class="blog-nav">
-          <a class="blog-nav-item active" href="#"><b>Accueil</b></a>
+          <a class="blog-nav-item active" ng-click="deconnect();" href="#/"><b>Connecté en tant que : {{personne.mail}}</b></a>
         </nav>
       </div>
     </div>
@@ -24,18 +25,22 @@
 
 <!-- Libraries -->
 <script src="js/angular.min.js"></script>
-<script src="js/ui-bootstrap-tpls-0.11.2.min.js"></script>
+<script src="js/ui-bootstrap-tpls-1.1.0.min.js"></script>
 <script src="js/angular-route.min.js"></script>
 <script src="js/angular-animate.min.js"></script>
-
+<script src="js/angular-cookies.min.js"></script>
+<script type"text/javascript" src="js/multipleDatePicker.min.js"></script>
+<script src="js/multipleDatePicker.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/angular-locale_fr.js"></script>
 <!-- AngularJS custom codes -->
 <script src="app/app.js"></script>
 <script src="app/data.js"></script>
 <script src="app/directives.js"></script>
 <script src="app/AccueilCtrl.js"></script>
-
+<script src="app/AgendaCtrl.js"></script>
+<script src="app/InscriptionCtrl.js"></script>
 <!-- Some Bootstrap Helper Libraries -->
-
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/underscore.min.js"></script>

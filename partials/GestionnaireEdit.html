@@ -1,0 +1,33 @@
+<button type="button" class="close" ng-click="cancel();">
+        <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
+    </button>
+	<div class="panel-heading">
+        <h3 class="modal-title">Gestionnaires</h3>
+    </div>
+	
+	<div class="modal-body">
+	<form name="Gestionnaires_form" class="form-horizontal" role="form" novalidate>
+	 <form-element label="Nouveau gestionnaire :">
+		   <input type="text" class="form-control" name="mail" placeholder="Email du nouveau gestionnaire" ng-model="mail" focus required/>
+		   <div class="text-right">
+                        <a class="btn btn-sm" ng-click="cancel()"><i class="ace-icon fa fa-reply"></i>retour</a>
+                        <button ng-click="ajoutGestionnaires(mail);"
+                                ng-disabled="Gestionnaires_form.$invalid || enableUpdate"
+                                class="btn btn-sm btn-primary"
+                                type="submit">
+                            <i class="ace-icon fa fa-check"></i>Ajouter gestionnaire
+                        </button>
+                    </div>
+		</form-element>
+		<table class="table table-striped">
+        <tr ng-repeat="gestionnaire in gestionnaires">
+        <td>{{gestionnaire.mail}}</td>
+		<td style="width:100px">
+		<div class="btn-group">
+        <button type="button" class="btn btn-danger fa fa-trash-o" ng-click="deleteGestionnaire(gestionnaire.mail);"></button>
+        </div>
+        </td>	
+    </tr>
+	</table>
+	</form>
+    </div>

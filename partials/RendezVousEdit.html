@@ -1,0 +1,49 @@
+<button type="button" class="close" ng-click="cancel();">
+        <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
+    </button>
+	<div class="panel-heading">
+        <h3 class="modal-title">Création d'un rendez-vous</h3>
+	</div>
+    <div class="modal-body">
+	<form name="RendezVous_form" class="form-horizontal" role="form" novalidate>
+	<form-element label="Date Début :">
+    <div class="row">
+         <div class="col-md-9">
+            <p class="input-group">
+              <input type="text" class="form-control" uib-datepicker-popup ng-model="rdv.DateDebut"  is-open="popupD.opened" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" required close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default " ng-click="openD()"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+	</div>
+	</form-element>
+	<form-element label="Heure Début :"> 	
+		<input type="time" class="form-control" name="HeureD" placeholder="Heure début du rendez-vous" ng-model="rdv.HeureDebut"/>
+	</form-element>
+	<form-element label="Date Fin :">
+		<div class="row">
+         <div class="col-md-9">
+            <p class="input-group">
+              <input  type="text" class="form-control" uib-datepicker-popup ng-model="rdv.DateFin" is-open="popupF.opened" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" required close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default " ng-click="openF()"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+	</div>
+	</form-element>
+	<form-element label="Heure Fin :">
+		<input  type="time" class="form-control" name="HeureF" placeholder="Heure fin du rendez-vous" ng-model="rdv.HeureFin"/>
+	</form-element>
+	<div class="text-right">
+                        <a class="btn btn-sm" ng-click="cancel()"><i class="ace-icon fa fa-reply"></i>retour</a>
+                        <button ng-click="ajoutRendezVous(rdv);"
+                                ng-disabled="RendezVous_form.$invalid || enableUpdate"
+                                class="btn btn-sm btn-primary"
+                                type="submit">
+                            <i class="ace-icon fa fa-check"></i>Ajouter le rendez-vous
+                        </button>
+                    </div>
+	</form>	
+    </div>

@@ -1,102 +1,185 @@
-app.controller('AccueilCtrl', function ($scope, $modal, $filter,$routeParams, Data) {
-	var mail = ($routeParams.mail);
-	
-    $scope.agendas = {};
+app.controller('AccueilCtrl', function ($scope,$uibModal,$rootScope,$routeParams,$location,$http,Data) {
+
+$scope.mail = "";
+    
+	//*** Liste des agendas ***//
     Data.get('agendas').then(function(data){
         $scope.agendas = data.data;
     });
-	$scope.inscriptions = {};
-	Data.get('inscriptions/'+mail).then(function(data){
-		$scope.inscriptions = data.data;
-	});
-	$scope.changeAgendaStatus = function(idAgenda){
-        agenda.status = (agenda.status=="Active" ? "Inactive" : "Active");
-        Data.put("products/"+agenda.idAgenda,{status:agenda.status});
-    };
+	//
+	
+	//*** Connexion de l'utilisateur ***//
+	$scope.connexion = function () {      
+	      $rootScope.connect($scope.mail);		         			
+	};	
+	//
+	
+	//*** Suppression d'une inscription ***//	
     $scope.deleteInscription = function(idRDV){
         if(confirm("Etes-vous sur de vouloir supprimer l'inscription ?")){
-            Data.delete("inscription/"+mail+"/"+idRDV).then(function(result){
-                $scope.inscriptions = _.without($scope.inscriptions, _.findWhere($scope.inscriptions, {idRDV:idRDV}));
+            Data.delete("inscription/"+$rootScope.personne.mail+"/"+idRDV).then(function(result){				  
+				Data.get('inscriptionPers/' +$rootScope.personne.mail).then(function(data){
+					$rootScope.personne.inscriptions = data.data;
+				});
             });
         }
     };
-    $scope.open = function (agendas,size) {
-        var modalInstance = $modal.open({
+	//	
+	
+	//*** Connexion vers le calendrier de rendez-vous de l'agenda choisi ***//
+	$scope.connexionAgenda = function (idAgenda) {
+        $rootScope.idAgenda = idAgenda;       	
+		$location.path('/agenda/' + $rootScope.idAgenda);
+	};
+	//
+	
+	//*** Ouverture Gestion des Agendas ***//
+    $scope.openA = function (agendas,size) {
+        var modalInstance = $uibModal.open({
           templateUrl: 'partials/AccueilEdit.html',
           controller: 'AccueilEditCtrl',
           size: size,
           resolve: {
-           agendas: function () {
-              return agendas;
-            }
-          }
+			  agendas: function () {
+				  return Data.get('agendas').then(function(data) {
+						return data.data;
+						});
+				}
+			}
         });
-		
-        modalInstance.result.then(function(selectedObject) {
-            if(selectedObject.save == "insert"){
-                $scope.agendas.push(selectedObject);
-                $scope.agendas = $filter('orderBy')($scope.agendas, 'libAgenda');
-            }else if(selectedObject.save == "update"){
-                agendas.mail = selectedObject.mail;
-                agendas.nbJourOuverture = selectedObject.nbJourOuverture;
-                agendas.nbJourLimite = selectedObject.nbJourLimite;
-                agendas.inscriptionMax = selectedObject.inscriptionMax;
-				agendas.dateCreation = selectedObject.dateCreation;
-            }
-        });
+		//*** Retour après fermeture de la Gestion Popup ***//
+        modalInstance.result.then(function() {
+			
+            Data.get('agendas').then(function(data){
+				$scope.agendas = data.data;
+				
+			});
+		});
     };
+	//
+	
+	//*** Ouverture popup des Createurs ***//
+	$scope.openC = function (createurs,size) {	
+		var modalInstance = $uibModal.open({
+			templateUrl: 'partials/CreateurEdit.html',
+			controller: 'CreateurEditCtrl',
+			size: size,
+			resolve: {
+				createurs: function () {
+					
+	            return Data.get('createurs').then(function(data) {
+		        return data.data;
+	            });
+					
+				}
+			}
+		});
+		
+	};
+	//
 });
 
-
-app.controller('AccueilEditCtrl', function ($scope, $modalInstance, agendas, Data) {
+app.controller('AccueilEditCtrl', function ($scope,$rootScope, $uibModalInstance, agendas, Data) {
 
   $scope.agendas = angular.copy(agendas);
-        
+  
+		$scope.agenda = {}; 
+		$scope.agenda.idAgenda = 0;   
         $scope.cancel = function () {
-            $modalInstance.dismiss('Close');
+            $uibModalInstance.close();			
         };
 		
-		
+		//*** Suppression d'un agenda ***//
 		$scope.deleteAgenda = function (idAgenda) {
-		if(confirm("Etes-vous sur de vouloir supprimer l'agenda ?")){
-			Data.delete("agendas/" +idAgenda).then(function(result){
-				$scope.agendas = _.without($scope.agendas, _.findWhere($scope.agendas, {idAgenda:idAgenda}));
-			});
-          }
-	    };       
-
-        var original = agendas;
-        $scope.isClean = function() {
-            return angular.equals(original, $scope.agendas);
-        }
-        $scope.saveAgenda = function ($idAgenda) {
-            agendas.uid = $scope.uid;
-            if(agendas.idAgenda > 0){
-                Data.put('agendas/'+agenda.idAgenda+ "/"+agenda.libAgenda+"/"+agenda.nbJourOuverture+"/"+agenda.nbJourLimite+"/"+inscritpionMax).then(function (result) {
+			if(confirm("Etes-vous sur de vouloir supprimer l'agenda ?")){
+				Data.delete("agendas/" +idAgenda).then(function(result){
+					if(result.status != 'error'){					
+						$scope.agendas = _.without($scope.agendas, _.findWhere($scope.agendas, {idAgenda:idAgenda}));
+					}
+					else {
+						alert("Cette agenda contient des rendez-vous , il ne peut être pas supprimer !")
+					}				
+				});
+			}
+		};       
+        //
+		
+        //*** Ajouter d'un nouvel agenda par un créateur ***//
+        $scope.saveAgenda = function (agenda) {
+			agenda.dateCreation = new Date().toISOString().slice(0,19).replace('T',' ');
+			agenda.mail = $rootScope.personne.mail;
+            if(agenda.idAgenda > 0){			
+                Data.post('agendas/'+agenda.idAgenda, agenda).then(function (result) {
                     if(result.status != 'error'){
-                        var x = angular.copy(agendas);
-                        x.save = 'update';
-                        $modalInstance.close(x);
-                    }else{
-                        console.log(result);
+                        $scope.agendas = [];
+						Data.get('agendas').then(function(data){
+						$scope.agendas = data.data;
+						});
                     }
-                });
-            }else{
-                agendas.status = 'Active';
-                Data.post('agendas', agenda).then(function (result) {
-                    if(result.status != 'error'){
-                        var x = angular.copy(agendas);
-                        x.save = 'insert';
-                        x.id = result.data;
-                        $modalInstance.close(x);
-                    }else{
+					else {					
                         console.log(result);
-                    }
+                    }	
                 });
             }
-        };
+			else {               
+                Data.post('agendas', agenda).then(function (result) {
+                    if(result.status != 'error'){
+						$scope.agendas = [];
+						Data.get('agendas').then(function(data){
+						$scope.agendas = data.data;
+						});
+                    }
+					else {
+                        console.log(result);						
+                    }
+                });
+			};
+		};
+		//
 });
 
-
-
-
+app.controller('CreateurEditCtrl', function ($scope,$rootScope, $uibModalInstance, createurs, Data) {
+	
+	$scope.createurs = angular.copy(createurs);
+	
+		$scope.createur = {};
+		$scope.mail = "";
+		$scope.cancel = function () {
+            $uibModalInstance.dismiss('Close');
+        };
+		
+	    //*** Ajout de créateur d'agendas par l'admin ***//
+		$scope.ajoutcreateurs = function (mail)  {
+			if(confirm("Etes-vous sur d'ajouter ce Créateur ?")) {
+				Data.put('ajoutcreateurs/'+ mail).then(function (result) {
+					if(result.status == 'error'){                        
+                        console.log(result);
+                    }
+					else {
+						$scope.mail = "";
+						Data.get('createurs').then(function(data) {
+						$scope.createurs = data.data;
+						});
+					}
+				});
+			};
+		};
+		//
+		
+		//*** Suppression d'un créateur d'agenda par l'admin ***//
+		$scope.supprcreateurs = function (mail)  {
+			if(confirm("Etes-vous sur de supprimer ce Créateur ?")) {
+				Data.put('supprcreateurs/'+ mail).then(function (result) {
+					if(result.status == 'error'){                        
+                        console.log(result);
+                    }
+					else{
+						Data.get('createurs').then(function(data) {
+						$scope.createurs = data.data;
+						});
+					}
+				});
+			};
+		};
+		//
+});

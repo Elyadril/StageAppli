@@ -1,0 +1,34 @@
+<h4 class="blog-post-title">Agenda : {{agenda.libAgenda}} </h4>
+<h4 >{{agenda.commentaire}}</h4>
+<hr/>
+<button type="button" class="btn btn-danger fa fa-reply" ng-click="retourAccueil();">&nbsp;Retour Accueil</button> 
+<button type="button" class="btn btn-danger fa fa-plus" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="openRDV(rendez_vous);">&nbsp;Nouveau rendez-vous</button>
+<button type="button" class="btn btn-danger fa fa-plus" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="openDupl(rendez_vous);">&nbsp;Dupliquer une journée</button>
+<div class="table-responsive">
+	<div class="panel panel-primary">
+		<div class="panel-heading">Dates disponibles
+		</div>
+		<div class="panel-body">
+			<table class="table table-striped" style="width:700px">
+				<tr ng-repeat="m in columns">
+					<th>{{m.text}}</th>
+					<td ng-repeat="rendezVous in rendez_vous | filter:m.value | orderBy:'DateDebut'" ng-click="accesInscriptions(rendezVous.DateDebut)">{{rendezVous.DateDebut.substring(8,10)}}</td>  
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+<div class="table-responsive col-md-3">
+	<div class="panel panel-primary">
+		<div class="panel-heading">Gestionnaires de l'agenda
+		</div>
+	<div class="panel-body">
+		<table class="table table-striped">
+			<tr ng-repeat="gestionnaires in gestionnaires"><td>{{gestionnaires.mail}}</td></tr>
+		</table>
+		<button type="button" class="btn btn-danger" ng-show="personne.createurAg	" ng-click="openG(gestionnaires);">&nbsp;Gestion des gestionnaires</button>
+	</div>
+	</div>
+</div>
+
+

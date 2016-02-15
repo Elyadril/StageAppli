@@ -1,0 +1,36 @@
+<button type="button" class="close" ng-click="cancel();">
+        <i class="fa fa-times-circle-o" style="margin:10px;color:blue;"></i>
+    </button>
+	<div class="panel-heading">
+        <h3 class="modal-title">Dupliquer une journée</h3>
+	</div>
+    <div class="modal-body">
+	<form name="Duplication_form" class="form-horizontal" role="form" novalidate>
+	<form-element label="Jour à dupliquer :">
+    <div class="row">
+         <div class="col-md-6">
+            <select ng-model="dateChoisi" ng-options="rendezVous.DateDebut for rendezVous in rendez_vous" onclick="afficheRDV">
+			<option value="">-- choisissez une date --</option>
+			</select>
+        </div>
+	</div>
+	</form-element>
+	<div class="panel-body">
+		<table class="table table-striped" ng-hide="afficheRDV">
+				<tr ng-repeat="rendezVous in rendez_vous">				
+					<th>
+						{{rendezVous.HeureDebut}}-{{rendezVous.HeureFin}}
+					</th>
+				</tr>
+		</table>
+	</div>
+	<form-element label="Choix des dates duppliquées">
+	<div class="row">
+		<div class="col-md-9">
+			<multiple-date-picker day-click="recupDate"/>
+		</div>
+	</div>
+	</form-element>
+	</form>
+	</div>
+	
