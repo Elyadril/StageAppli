@@ -73,6 +73,32 @@ class dbHelper {
         }
         return $response;
     }
+  //*** affichage des dates ou il ya des inscriptions ***//
+  function inscriptions($idAgenda, $DateDebut) {
+  
+  try{  
+   $DateDeb = date('Y-m-d', strtotime($DateDebut));
+   $datePlusUn = date('Y-m-d', strtotime($DateDebut.' + 1 DAY'));
+   $stmt = $this->db->prepare("select idRDV, DateDebut, DateFin  from rendez_vous where idAgenda = :idAgenda and DateDebut >= :DateDebut and DateDebut < :DatePlusUn");
+   $stmt->execute(array(':idAgenda' => $idAgenda, ':DateDebut' => $DateDeb, ':DatePlusUn' => $datePlusUn));
+   //$stmt->debugDumpParams();
+   
+   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+   if(count($rows)<=0){
+    $response["status"] = "warning";
+    $response["message"] = "No data found.";
+   }else{
+    $response["status"] = "success";
+    $response["message"] = "Data selected from database";
+   }
+    $response["data"] = $rows;
+  }catch(PDOException $e){
+   $response["status"] = "error";
+   $response["message"] = 'Select Failed: ' .$e->getMessage();
+   $response["data"] = null;
+  }
+  return $response;
+  }
     function insert($table, $columnsArray, $requiredColumnsArray) {
         $this->verifyRequiredParams($columnsArray, $requiredColumnsArray);
         

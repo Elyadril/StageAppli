@@ -1,6 +1,10 @@
-app.controller('AccueilCtrl', function ($scope,$uibModal,$rootScope,$routeParams,$location,$http,Data) {
+app.controller('AccueilCtrl', function ($scope,$uibModal,$rootScope,$routeParams,$cookies,$location,$http,Data) {
 
-$scope.mail = "";
+	if ($routeParams.cle) {
+		$cookies.put('cle',$routeParams.cle);
+		$rootScope.connect($routeParams.cle);		
+	}
+	$scope.mail = "";
     
 	//*** Liste des agendas ***//
     Data.get('agendas').then(function(data){
@@ -8,22 +12,25 @@ $scope.mail = "";
     });
 	//
 	
-	//*** Connexion de l'utilisateur ***//
-	$scope.connexion = function () {      
-	      $rootScope.connect($scope.mail);		         			
+	//*** Connexion de l'utilisateur ***//    
+	$scope.connexion = function() {  
+		Data.get('personneCle/' + $scope.mail).then(function(data) {
+			$scope.mail="";
+			alert(data.message);	         			
+		});
 	};	
 	//
 	
 	//*** Suppression d'une inscription ***//	
     $scope.deleteInscription = function(idRDV){
-        if(confirm("Etes-vous sur de vouloir supprimer l'inscription ?")){
-            Data.delete("inscription/"+$rootScope.personne.mail+"/"+idRDV).then(function(result){				  
+		if(confirm("Etes-vous sur de vouloir supprimer l'inscription ?")){
+			Data.delete("inscription/"+$rootScope.personne.mail+"/"+idRDV).then(function(result){				  
 				Data.get('inscriptionPers/' +$rootScope.personne.mail).then(function(data){
 					$rootScope.personne.inscriptions = data.data;
 				});
-            });
-        }
-    };
+			});
+		}
+	};
 	//	
 	
 	//*** Connexion vers le calendrier de rendez-vous de l'agenda choisi ***//
@@ -32,6 +39,7 @@ $scope.mail = "";
 		$location.path('/agenda/' + $rootScope.idAgenda);
 	};
 	//
+		
 	
 	//*** Ouverture Gestion des Agendas ***//
     $scope.openA = function (agendas,size) {
@@ -109,12 +117,14 @@ app.controller('AccueilEditCtrl', function ($scope,$rootScope, $uibModalInstance
 			agenda.dateCreation = new Date().toISOString().slice(0,19).replace('T',' ');
 			agenda.mail = $rootScope.personne.mail;
             if(agenda.idAgenda > 0){			
-                Data.post('agendas/'+agenda.idAgenda, agenda).then(function (result) {
+                Data.put('agendas/'+agenda.idAgenda, agenda).then(function (result) {
                     if(result.status != 'error'){
-                        $scope.agendas = [];
-						Data.get('agendas').then(function(data){
-						$scope.agendas = data.data;
-						});
+                        //$scope.agendas = [];
+						//Data.get('agendas/' + agenda.idAgenda).then(function(data){
+						//$scope.agendas = data.data;
+						//});
+						var x = angular.copy(agendas)
+						x.save = 'Update';
                     }
 					else {					
                         console.log(result);
@@ -124,10 +134,13 @@ app.controller('AccueilEditCtrl', function ($scope,$rootScope, $uibModalInstance
 			else {               
                 Data.post('agendas', agenda).then(function (result) {
                     if(result.status != 'error'){
-						$scope.agendas = [];
-						Data.get('agendas').then(function(data){
-						$scope.agendas = data.data;
-						});
+						//$scope.agendas = [];
+						//Data.get('agendas').then(function(data){
+						//$scope.agendas = data.data;
+						//});
+						var x = angular.copy(agendas);
+						x.save = 'insert';
+						x.id = result.data;
                     }
 					else {
                         console.log(result);						

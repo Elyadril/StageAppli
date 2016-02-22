@@ -29,7 +29,7 @@ $rootScope.idAgenda = ($routeParams.idAgenda);
 	
 	//*** Retour à l'ecran d'accueil ***//
 	$scope.retourAccueil = function () {       
-		$location.path('/' + $rootScope.personne.mail);
+		$location.path('/');
 	};
     //
 	
@@ -38,6 +38,7 @@ $rootScope.idAgenda = ($routeParams.idAgenda);
 		$location.path('/agenda/'+ $rootScope.idAgenda+'/inscription/'+DateDebut);
 	};
     //
+		
 	//*** Ouverture popup de Gestion des gestionnaires ***//
 	$scope.openG = function (gestionnaires, size) {		
 		var modalInstance = $uibModal.open({
@@ -167,65 +168,55 @@ app.controller('GestionnairesEditCtrl', function ($scope,$rootScope, $uibModalIn
 
 app.controller('RendezVousEditCtrl', function ($scope,$rootScope, $uibModalInstance,rendez_vous, Data) {
 	
-	
-	$scope.rdv = {};
-	$scope.cancel = function () {
+		$scope.rdv = {};
+		$scope.cancel = function () {
             $uibModalInstance.close();
         };
-		
+  
 	$scope.disabled = function(date, mode) {
 		return mode === 'day' && (date.getDay() === 0 || date.getDay() === 6);
     };
-	
+ 
 	$scope.openD = function() {
 		$scope.popupD.opened = true;
     };
-	
+ 
     $scope.popupD = {
 		opened: false
     };
-	$scope.openF = function() {
-		$scope.popupF.opened = true;
-    };
 	
+	$scope.openF = function() {
+		$scope.initDateFin();
+		
+	$scope.popupF.opened = true;
+    };
+ 
+	$scope.initDateFin = function() {
+		if (!$scope.rdv.DateFin && $scope.rdv.DateDebut) {
+			$scope.rdv.DateFin = $scope.rdv.DateDebut; 
+		}
+	};
+ 
     $scope.popupF = {
 		opened: false
-    };	
-	
-	$scope.ajoutRendezVous = function (rdv)  {
-		rdv.DateCreation = new Date().toISOString().slice(0,19).replace('T',' ');		
-		if(confirm("Etes-vous sur d'ajouter ce rendez-vous ?")) {			
-			Data.post('ajoutRendezVous', {'DateDebut':rdv.DateDebut,'HeureDebut':rdv.HeureDebut,'DateFin':rdv.DateFin,'HeureFin':rdv.HeureFin,'idAgenda':$rootScope.idAgenda}).then(function (result) {
-				if(result.status != 'error'){
-					$scope.rdv = {};
-				    Data.get('rendez_vous/agenda/' + $rootScope.idAgenda).then(function(data) {
-						$scope.rendez_vous = data.data;
-                    });
-					}
-				else{
-					console.log(result);
-				}
-			});
-		};
+	}; 
+ 
+	$scope.ajoutRendezVous = function (rdv)  {   
+		Data.post('ajoutRendezVous', {'DateDebut':rdv.DateDebut,'DateFin':rdv.DateFin,'idAgenda':$rootScope.idAgenda}).then(function (result) {
+			if(result.status != 'error'){
+				var inter = $scope.rdv.DateFin - $scope.rdv.DateDebut;
+				$scope.rdv.DateDebut = $scope.rdv.DateFin;
+				$scope.rdv.DateFin = new Date($scope.rdv.DateDebut.getTime() + inter);
+				Data.get('rendez_vous/agenda/' + $rootScope.idAgenda).then(function(data) {
+					$scope.rendez_vous = data.data;
+				});
+			} else {
+				console.log(result);
+			}
+		});
 	};
-	
+ 
 });
 
-app.controller('DuplicationCtrl', function ($scope,$rootScope, $uibModalInstance,rendez_vous, Data) {
 	
-	$scope.rendez_vous = rendez_vous;
-	
-	$scope.cancel = function () {
-            $uibModalInstance.close();
-	};
-	
-	$scope.recupDate = function() {
-		
-	};
-	$scope.afficheRDV = function () {
-		Data.get('agenda/'+$rootScope.idAgenda+'/inscription/'+$rootScope.DateDebut).then(function(data) {
-			$scope.rendez_vous = data.data;
-		});
-    };
-});
 

@@ -3,7 +3,7 @@
 <hr/>
 <button type="button" class="btn btn-danger fa fa-reply" ng-click="retourAccueil();">&nbsp;Retour Accueil</button> 
 <button type="button" class="btn btn-danger fa fa-plus" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="openRDV(rendez_vous);">&nbsp;Nouveau rendez-vous</button>
-<button type="button" class="btn btn-danger fa fa-plus" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="openDupl(rendez_vous);">&nbsp;Dupliquer une journée</button>
+<button type="button" class="btn btn-danger fa fa-plus" ng-hide="personne.isGestionnaire(agenda.idAgenda)" ng-click="openDupl(rendez_vous);">&nbsp;Dupliquer une journée</button>
 <div class="table-responsive">
 	<div class="panel panel-primary">
 		<div class="panel-heading">Dates disponibles

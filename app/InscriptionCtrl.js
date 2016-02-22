@@ -5,8 +5,12 @@ $rootScope.DateDebut = ($routeParams.DateDebut);
 
 	//*** Information de l'agenda choisi ***//
     $scope.agenda = {};
-	    Data.get('agendas/' +$rootScope.idAgenda).then(function(data) {
-		    $scope.agenda = data.data[0];
+	Data.get('agendas/' +$rootScope.idAgenda).then(function(data) {
+		$scope.agenda = data.data[0];
+		//*** Recuperation des rendez-vous de la date choisie avec les inscrits éventuels ***//
+		$scope.chargeRDV();
+		//
+		
 	});
 	//
 	
@@ -25,15 +29,59 @@ $rootScope.DateDebut = ($routeParams.DateDebut);
 			$scope.rendez_vous.forEach(function(rdv){
 				Data.get('inscriptions/rdv/' +rdv.idRDV).then(function(data) {
 					rdv.inscriptions = data.data;
+					rdv.info = $rootScope.desactiveInscription(rdv, $rootScope.personne, false);
+					if (rdv.info)
+						rdv.cacher = true;
+					else 
+						rdv.cacher = false;
 				});	
 			});		
 		});
 	}
 	//
 	
-	//*** Recuperation des rendez-vous de la date choisie avec les inscrits éventuels ***//
-	$scope.chargeRDV();
-	//
+	//*** Desactive les inscriptions selon le controle effectif ***//
+	$rootScope.desactiveInscription = function(rdv, personne, bypass) {
+		var result = rdv.inscriptions.length >= $scope.agenda.inscriptionMax;
+		if(result) {
+			return  "Nombre limite atteint.";
+		}
+		
+		
+		var dateOuverture =  new Date(new Date(rdv.DateDebut).getTime() - ($scope.agenda.nbJourOuverture * 1000*60*60*24));
+		result = new Date() < dateOuverture;
+		if(result) {
+			return "Ouverture le " + dateOuverture.toLocaleString();
+		}
+		
+		
+		var dateFermeture = new Date(new Date(rdv.DateDebut).getTime() - ($scope.agenda.nbJourLimite * 1000*60*60*24));
+		result = new Date() > dateFermeture;
+		if(result) {
+			return "Fermeture le " + dateFermeture.toLocaleString();
+		}
+		
+		if(!$scope.agenda.autoIns || bypass) {
+			var dateReinscriptionMax = new Date(new Date(rdv.DateDebut).getTime() + ($scope.agenda.nbJourReins * 1000*60*60*24));
+			var dateReinscriptionMin = new Date(new Date(rdv.DateDebut).getTime() - ($scope.agenda.nbJourReins * 1000*60*60*24));
+			rdv.info = "";
+			if (personne.inscriptions) {
+				for(var i = 0; i < personne.inscriptions.length; i++) {
+					var inscription = personne.inscriptions[i];
+					if (inscription.idRDV == rdv.idRDV) {
+						return "Déjà inscrit sur ce créneau";
+						
+					} 
+					result = inscription.idAgenda == $rootScope.idAgenda && new Date(rdv.DateDebut) >= dateReinscriptionMin && new Date(rdv.DateDebut) < dateReinscriptionMax;
+					//rdv.info += rdv.DateDebut.toLocaleString() + "  >= " + dateReinscriptionMin.toLocaleString() + " && " + rdv.DateDebut.toLocaleString() + " < " + dateReinscriptionMax.toLocaleString() + "    ";
+					if(result) {
+						return "Reinscription impossible, déjà inscrit le " + new Date(inscription.DateDebut).toLocaleString();
+					}
+				}
+			}
+		}		
+		return false;
+	};
 	
 	//*** Suppression d'une inscription par le gestionnaire ***//
 	$scope.deleteInscription = function(mail,idRDV){
@@ -53,10 +101,6 @@ $rootScope.DateDebut = ($routeParams.DateDebut);
 			});
 		}
 	};
-	//
-	
-	//*** Verification de la date d'ouverture ***//
-	
 	//
 	
 	//*** Ouverture popup des inscriptions ***//
@@ -93,14 +137,30 @@ app.controller('InscriptionEditCtrl', function ($scope,$rootScope, $uibModalInst
 		
 	//*** Ajout d'une inscription ***//
 	$scope.ajoutInscription = function (mail) {
-		Data.post('ajoutInscription', {'mail':mail,'idRDV':rdv.idRDV}).then(function (result) {
-			if(result.status != 'error'){                      
-					$uibModalInstance.close();                   
+		Data.get('personnes/' +mail).then(function(data) {
+			if(data && data.data) {
+				var personne = data.data[0];
+				Data.get('inscriptionPers/'+mail).then(function(data){				
+					personne.inscriptions = data.data; 	
+					var info = $rootScope.desactiveInscription(rdv, personne, true);
+					
+					if (info) {
+						alert(info);
+					} else {
+						Data.post('ajoutInscription', {'mail':mail,'idRDV':rdv.idRDV}).then(function (result) {
+							$uibModalInstance.close();    
+							if(result.status == 'error'){                                     
+								alert(result.message);
+
+							}	
+						});	
+					}
+					
+	            });		
+				
 			}
-			else{
-					console.log(result);
-			}	
-		});	
+	
+		 });
 	};
 	//
 });

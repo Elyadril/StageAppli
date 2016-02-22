@@ -16,10 +16,13 @@
 		<form-element label="Nombres de jours limite:">
 		   <input type="text" class="form-control" name="JourL" placeholder="Nombres de jour limite des inscriptions" ng-model="agenda.nbJourLimite" only-numbers required>
 		</form-element>
+		<form-element label="Nombres de jours avant ré-inscription:">
+		   <input type="text" class="form-control" name="JourL" placeholder="Nombres de jour avant ré-inscription" ng-model="agenda.nbJourReins" only-numbers required>
+		</form-element>
 		<form-element label="Inscriptions max :">
 		   <input type="text" class="form-control" name="MaxI" placeholder="Nombres d'inscriptions max par rendez-vous" ng-model="agenda.inscriptionMax" only-numbers required>
 		</form-element>
-		<form-element label="Cacher les noms des inscrits :">
+		<form-element label="Cacher le noms des inscrits :">
 			<input type="checkbox" class="form-control"  style="width:25px" name="cacheN" ng-model="agenda.cacheNom">
 		</form-element>
 		<form-element label="Autoriser l'inscription par d'autres personnes :">
@@ -59,7 +62,7 @@
 			<td>{{agenda.libAgenda}}</td>
 			<td style="width:100px">
 			<div class="btn-group">
-			<button type="button" class="btn btn-default fa fa-edit" ng-click="openModif;"></button>
+			<button type="button" class="btn btn-default fa fa-edit" ng-click="saveAgenda(agenda);"></button>
 			<button type="button" class="btn btn-danger fa fa-trash-o" ng-click="deleteAgenda(agenda.idAgenda);"></button>
 			</div>
 			</td>	

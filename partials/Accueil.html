@@ -12,44 +12,45 @@
 				</div>
 			</div>
 		</div>
-	<div class="panel-body" >
-		<br/><table class="table table-striped">
-		<tr ng-show="agendas.length==0"><td style="vertical-align:middle;"><i class="fa fa-ban fa-3x"></i>&nbsp;No data found</td></tr>
-		<tr ng-hide="agendas.length>-1"><td style="vertical-align:middle;"><i class="fa fa-cog fa-3x fa-spin"></i>&nbsp;Loading</td></tr>		
-		<tr ng-repeat="agenda in agendas | filter:filtreAgenda | orderBy:'libAgenda'">		
-			<td ng-click="connexionAgenda(agenda.idAgenda)">			
-				{{agenda.libAgenda}}		
-			</td>			
-		</tr>	
+		<div class="panel-body" ><br/>
+			<table class="table table-striped">
+				<tr ng-hide="agendas.length>-1"><td style="vertical-align:middle;"><i class="fa fa-cog fa-3x fa-spin"></i>&nbsp;Chargement</td></tr>		
+				<tr ng-repeat="agenda in agendas | filter:filtreAgenda | orderBy:'libAgenda'">		
+					<td ng-click="connexionAgenda(agenda.idAgenda)">{{agenda.libAgenda}}</td>			
+				</tr>	
 			</table>
-		<button type="button" class="btn btn-danger" ng-show="personne.createurAg" ng-click="openA(agendas);">&nbsp;Gestion des Agendas</button> 
-	</div>
+			<button type="button" class="btn btn-danger" ng-show="personne.createurAg" ng-click="openA(agendas);">&nbsp;Gestion des Agendas</button> 
+		</div>
 	</div>
 </div>
 <div class="table-responsive col-md-9">
 	<div class="panel panel-primary">
-		<div class="panel-heading ">Vos rendez-vous :
-		</div>
+		<div class="panel-heading ">Vos rendez-vous :</div>
+
 		<div class="panel-body">
-			<table class="table table-striped">
-				<tr ng-show="personne.inscriptions.length==0"><td ng-show="personne" style="vertical-align:middle;"><i class="fa fa-info-circle fa-3x"></i>&nbsp;aucun rendez-vous</td></tr>
-				<tr ng-hide="personne"><td style="vertical-align:middle;"><i class="fa fa-info-circle fa-3x"></i>&nbsp;Veuillez-vous connecter!</td></tr> 
-			</table>
-		<table class="table table-striped">
-			<div ng-hide="personne">Votre adresse mail :
-				<input name="mail" ng-model="mail" type="text"  class="form-control col-md-8-offset" placeholder="Votre mail ...." />
-			<button type="button" class="btn btn-danger" ng-hide="personne" ng-click="connexion();">&nbsp;Connexion</button>
-			<div ng-show="personne"><tr ng-repeat="inscription in personne.inscriptions | orderBy:'-mail'">
-				<td>- {{inscription.libAgenda}} le {{inscription.DateDebut}} de {{inscription.HeureDebut.substring(0,5)}}h à {{inscription.HeureFin.substring(0,5)}}h</td>  		 	 		 
-				<td style="width:100px">
-		<div class="btn-group">
-			<button type="button" ng-show="personne" class="btn btn-danger fa fa-trash-o" ng-click="deleteInscription(inscription.idRDV);"></button>
-        </div>
-				</td>		
+			
+			<div ng-show="personne.inscriptions.length==0"><i class="fa fa-info-circle fa-3x"></i>&nbsp;Aucun rendez-vous</div>
+			<div ng-hide="personne"><i class="fa fa-info-circle fa-3x"></i>&nbsp;Pour s'inscrire à un rendez-vous vous devez vous connecter à l'aide d'un lien sécurisé.</div> 
+		
+			<form name="connexion_form" class="form-horizontal" role="form" novalidate>
+				<div ng-hide="personne">Votre adresse mail :
+					<input name="mail" ng-model="mail" type="text" class="form-control col-md-8-offset" placeholder="Votre mail ...." required />
+					<button type="button" class="btn btn-danger" ng-hide="personne" ng-click="connexion();">&nbsp;Recevoir mon lien de connexion</button>
+					
+				</div>
+			</form>
+			
+			<table ng-show="personne" class="col-md-12">
+				<tr ng-repeat="inscription in personne.inscriptions">
+					<td>- {{inscription.libAgenda}} le {{inscription.DateDebut.substring(0,10)}} de {{inscription.DateDebut.substring(11,16)}} h à {{inscription.DateFin.substring(11,16)}} h</td>  		 	 		 
+					<td style="width:100px">
+						<div class="btn-group">
+							<button type="button" ng-show="personne" class="btn btn-danger fa fa-trash-o" ng-click="deleteInscription(inscription.idRDV);"></button>
+						</div>
+					</td>		
 				</tr>
-			</div>
-		</table>
-			</div>
+			</table>
+			
 		</div>
 	</div>
 </div>

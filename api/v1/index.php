@@ -1,6 +1,9 @@
 <?php
 require '.././libs/Slim/Slim.php';
 require_once 'dbHelper.php';
+include '../libs/mail/mail.php';
+
+date_default_timezone_set('Europe/Paris');
 
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
@@ -19,7 +22,7 @@ delete(table name, where clause as array)
 
 $app->get('/agendas', function() { 
     global $db;
-    $rows = $db->selectEquals("agenda","idAgenda, libAgenda, mail, nbJourOuverture, nbJourLimite, inscriptionMax",array());
+    $rows = $db->selectEquals("agenda","idAgenda, libAgenda, mail, nbJourOuverture, nbJourLimite,nbJourReins, inscriptionMax,cacheNom,autoIns,commentaire",array());
     echoResponse(200, $rows);
 });
 $app->get('/gestionnaires/:idAgenda', function($idAgenda) {
@@ -35,6 +38,24 @@ $app->get('/gestionAg/:mail', function($mail) {
 $app->get('/personnes/:mail', function($mail) {
 	global $db;
 	$rows = $db->selectEquals("personne","mail, nom, prenom, grade, createurAg, admin", array('mail'=>$mail));
+	echoResponse(200, $rows);
+});
+$app->get('/personneCle/:mail', function($mail) {
+	global $db;
+	$rows = $db->selectEquals("personne","cle", array('mail'=>$mail));
+	if($rows["status"]=="success") {
+			$rows["message"] = "Vous allez recevoir un mail";
+			mail_type($mail, $rows["data"][0]["cle"]);
+			
+		}
+		else {
+			$rows["message"] = "Adresse mail inconnu.";
+		}
+	echoResponse(200, $rows);
+});
+$app->get('/personne/:cle', function($cle) {
+	global $db;
+	$rows = $db->selectEquals("personne","mail, nom, prenom, grade, createurAg, admin", array('cle'=>$cle));
 	echoResponse(200, $rows);
 });
 $app->get('/createurs', function() {
@@ -54,17 +75,18 @@ $app->get('/inscriptions/:mail', function($mail) {
 });
 $app->get('/agendas/:idAgenda', function($idAgenda){
 	global $db;
-	$rows = $db->selectEquals("agenda","idAgenda, libAgenda, mail, nbJourOuverture, nbJourLimite, inscriptionMax,cacheNom,autoIns,commentaire", array('idAgenda'=>$idAgenda));
+	$rows = $db->selectEquals("agenda","idAgenda, libAgenda, mail, nbJourOuverture, nbJourLimite,nbJourReins, inscriptionMax,cacheNom,autoIns,commentaire", array('idAgenda'=>$idAgenda));
 	echoResponse(200, $rows);
 });
+ 
 $app->get('/rendez_vous/agenda/:idAgenda', function($idAgenda) {   
-	global $db;
-	$rows = $db->selectEquals("rendez_vous","distinct DateDebut", array('idAgenda'=>$idAgenda));
-	echoResponse(200, $rows);
+ global $db;
+ $rows = $db->selectEquals("rendez_vous","distinct DATE(DateDebut) as DateDebut", array('idAgenda'=>$idAgenda));
+ echoResponse(200, $rows);
 });
 $app->get('/agenda/:idAgenda/inscription/:DateDebut', function($idAgenda,$DateDebut) {   
 	global $db;
-	$rows = $db->selectEquals("rendez_vous","idRDV,DateDebut, HeureDebut,HeureFin", array('idAgenda'=>$idAgenda,'DateDebut'=>$DateDebut));
+	$rows = $db->inscriptions($idAgenda,$DateDebut);
 	echoResponse(200, $rows);
 });
 $app->get('/inscriptions/rdv/:idRDV', function($idRDV) {
@@ -74,25 +96,22 @@ $app->get('/inscriptions/rdv/:idRDV', function($idRDV) {
 });
 $app->get('/inscriptionPers/:mail', function($mail) {
 	global $db;
-	$rows = $db->selectEquals("inscriptionPers","mail,idRDV,DateDebut,HeureDebut,HeureFin,libAgenda", array('mail'=>$mail));
+	$rows = $db->selectEquals("inscriptionPers","mail,idRDV,DateDebut,DateFin,libAgenda,idAgenda,nbJourLimite", array('mail'=>$mail));
 	echoResponse(200, $rows);
 });
-$app->get('/nbInscription/:idAgenda', function($idAgenda) {
+ function verifnbInscrit($idRDV) {
 	global $db;
-	$rows = $db->selectEquals("nbInscription","idAgenda,idRDV,DateDebut,HeureDebut,HeureFin,nbInscrits,inscriptionMax", array('idAgenda'=>$idAgenda));
+	$rows = $db->selectEquals("nbInscription","idAgenda,idRDV,DateDebut,DateFin,nbInscrits,inscriptionMax", array('idRDV'=>$idRDV));
+	return $rows["data"][0];
+};
+$app->get('/rendez_vousD/:DateDebut', function($DateDebut) {
+	global $db;
+	$rows = $db->selectEquals("rendez_vous","idRDV,DateDebut,DateFin,idAgenda", array('DateDebut'=>$DateDebut));
 	echoResponse(200, $rows);
-});
-$app->get('/rendez_vous/:DateDebut', function($DateDebut) {
-	global $db;
-	$rows = $db->selectEquals("rendez_vous","idRDV,DateDebut,distinct HeureDebut,DateFin,distinct HeureFin,idAgenda", array('DateDebut'=>$DateDebut));
-});
-$app->get('/rendez_vous/:idRDV', function($idRDV) {
-	global $db;
-	$rows = $db->selectEquals("rendez_vous","idRDV,DateDebut,distinct HeureDebut,DateFin,distinct HeureFin,idAgenda", array('idRDV'=>$idRDV));
 });
 $app->post('/agendas', function() use ($app) {
     $data = json_decode($app->request->getBody());
-    $mandatory = array('libAgenda','mail','nbJourOuverture','nbJourLimite','inscriptionMax','dateCreation');
+    $mandatory = array('libAgenda','mail','nbJourOuverture','nbJourLimite','nbJourReins','inscriptionMax','dateCreation');
     global $db;
     $rows = $db->insert("agenda", $data, $mandatory);
     if($rows["status"]=="success")
@@ -102,11 +121,22 @@ $app->post('/agendas', function() use ($app) {
 $app->post('/ajoutInscription', function() use ($app) {
 	$data = json_decode($app->request->getBody());
 	$mandatory = array('mail','idRDV');
-	global $db; 
-	$rows = $db->insert("inscription", $data, $mandatory);
-	if($rows["status"]=="success")
-		$rows["message"] = "Inscription ajoutée !";
-		echoResponse(200, $rows);
+	$nbInscription = verifnbInscrit($data->idRDV);
+	if($nbInscription["nbInscrits"] < $nbInscription["inscriptionMax"]){
+		global $db;
+		$rows = $db->insert("inscription", $data, $mandatory);
+		if($rows["status"]=="success") {
+			$rows["message"] = "Inscription ajoutée !";
+		}
+		else {
+			$rows["message"] = "Déjà inscrit !";
+		}
+	}
+    else {
+		$rows["status"] = "error";
+		$rows["message"] = "Nombre limite atteint !";		
+	}
+	echoResponse(200, $rows);
 });
 $app->put('/agendas/:idAgenda', function($idAgenda) use ($app) { 
     $data = json_decode($app->request->getBody());
@@ -115,7 +145,7 @@ $app->put('/agendas/:idAgenda', function($idAgenda) use ($app) {
     global $db;
     $rows = $db->update("agenda", $data, $condition, $mandatory);
     if($rows["status"]=="success")
-        $rows["message"] = "Agenda crée !";
+        $rows["message"] = "Agenda modifié !";
 		echoResponse(200, $rows);
 });
 $app->put('/ajoutcreateurs/:mail', function($mail) use ($app) {
@@ -160,10 +190,12 @@ $app->put('/supprGestionnaires', function() use ($app) {
 });
 $app->post('/ajoutRendezVous', function() use ($app) {
 	$data = json_decode($app->request->getBody());
-	$mandatory = array('DateDebut','HeureDebut','DateFin','HeureFin','idAgenda');
+	$mandatory = array('DateDebut','DateFin','idAgenda');
+	$data->DateDebut = date('Y-m-d H:i:s', strtotime($data->DateDebut));
+	$data->DateFin   = date('Y-m-d H:i:s', strtotime($data->DateFin));
 	global $db;
 	$rows = $db->insert("rendez_vous", $data, $mandatory);
-	 if($rows["status"]=="success")
+	if($rows["status"]=="success")
        $rows["message"] = "Rendez-vous ajouté !";
 		echoResponse(200, $rows);
 });

@@ -6,7 +6,7 @@
     </div>
 	<form name="Inscriptions_form" class="form-horizontal" role="form" novalidate>
 	 <form-element label="Nouvelle inscription">
-		   <input type="text" class="form-control" name="mail" ng-disabled="agenda.autoIns" placeholder="email d'inscription" ng-model="mail" focus required/>   
+		   <input type="text" class="form-control" name="mail" ng-disabled="!agenda.autoIns" placeholder="email d'inscription" ng-model="mail" focus required/>   
 		   <div class="text-right">
                         <a class="btn btn-sm" ng-click="cancel()"><i class="ace-icon fa fa-reply"></i>retour</a>
                         <button ng-click="ajoutInscription(mail);"

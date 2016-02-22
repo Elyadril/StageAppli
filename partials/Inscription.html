@@ -3,30 +3,43 @@
 <button type="button" class="btn btn-danger fa fa-reply" ng-click="retourAgenda(idAgenda);">&nbsp;Retour Agenda</button> 
 <div class="table-responsive">
 	<div class="panel panel-primary">
-		<div class="panel-heading">Ouverture des inscriptions : {{agenda.nbJourOuverture}} jours avant la date du rendez-vous
-			<br>  
-			Dernier délai d'inscription : {{agenda.nbJourLimite}} jours avant la date du rendez-vous </br> 
-			Limité à {{agenda.inscriptionMax}} participants maximum par créneau
+		<div class="panel-heading">Ouverture des inscriptions : {{agenda.nbJourOuverture}} jours avant la date du rendez-vous		 
+			<br> Dernier délai d'inscription : {{agenda.nbJourLimite}} jours avant la date du rendez-vous </br>
+				 Délai avant ré-inscription : {{agenda.nbJourReins}} jours après le rendez-vous </br>
+			     Limité à {{agenda.inscriptionMax}} participants maximum par créneau
 		</div>
 		<div class="panel-body">
 			<table class="table table-striped">
-				<tr ng-repeat="rendezVous in rendez_vous | orderBy:'HeureDebut'">
-					<th>
-						<button type="button" class="btn btn-danger fa fa-trash-o" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="deleteRDV(rendezVous.idRDV);"></button>
-						{{rendezVous.HeureDebut.substring(0,5)}}h-{{rendezVous.HeureFin.substring(0,5)}}h
-					</th>
+				<tr>
+				<th class="col-md-2"> Créneaux </th>
+				<th class="col-md-6" ng-hide="agenda.cacheNom && !personne.isGestionnaire(agenda.idAgenda)"> Inscrits </th>
+				<th class="col-md-2"> Nombre d'inscrits </th>
+				<th class="col-md-2" ng-hide="!personne"> Ajout d'inscription </th>
+				</tr>
+				
+				<tr ng-repeat="rendezVous in rendez_vous | orderBy:'DateDebut'">
 					<td>
+						<button type="button" class="btn btn-danger fa fa-trash-o" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="deleteRDV(rendezVous.idRDV);"></button>
+						{{rendezVous.DateDebut.substring(11,16)}}h-{{rendezVous.DateFin.substring(11,16)}}h
+					</td>
+					<td ng-hide="agenda.cacheNom && !personne.isGestionnaire(agenda.idAgenda)">
 						<ul class="list-unstyled">
-							<li ng-repeat="inscription in rendezVous.inscriptions" ng-hide="agenda.cacheNom">
+							<li ng-repeat="inscription in rendezVous.inscriptions" >
                                 <button type="button" class="btn btn-danger fa fa-trash-o" ng-show="personne.isGestionnaire(agenda.idAgenda)" ng-click="deleteInscription(inscription.mail,inscription.idRDV);"></button>							
-								{{inscription.mail}}			
+								{{inscription.mail}}								
 							</li>
 						</ul>
 					</td>
 					<td>
-						<button type="button" class="btn btn-danger fa fa-plus" ng-click="openIns(rendezVous);"></button> 					
+						{{rendezVous.inscriptions.length}}
+					</td>
+					<td ng-hide="!personne">
+						<button type="button" class="btn btn-danger fa fa-plus" ng-hide="rendezVous.cacher" ng-click="openIns(rendezVous);"></button> 					
+						<button type="button" class="btn btn-danger fa fa-plus disabled" uib-popover="{{rendezVous.info}}" popover-trigger="mouseenter" ng-show="rendezVous.cacher"></button> 						
+						
 					</td>
 				</tr>
+				
 			</table>
 		</div>
 	</div>

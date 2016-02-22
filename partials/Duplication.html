@@ -9,28 +9,28 @@
 	<form-element label="Jour à dupliquer :">
     <div class="row">
          <div class="col-md-6">
-            <select ng-model="dateChoisi" ng-options="rendezVous.DateDebut for rendezVous in rendez_vous" onclick="afficheRDV">
-			<option value="">-- choisissez une date --</option>
+            <select ng-model="dateChoisi" ng-options="rendezVous.DateDebut for rendezVous in rendez_vous | orderBy:'DateDebut'" ng-change="recupRDV">
+			<option value="">-- choisissez une date --</option>		
 			</select>
         </div>
-	</div>
-	</form-element>
-	<div class="panel-body">
-		<table class="table table-striped" ng-hide="afficheRDV">
-				<tr ng-repeat="rendezVous in rendez_vous">				
+	<div class="panel-body" ng-show="recupRDV">
+		<table class="table table-striped">
+				<tr ng-repeat="rdv in rendezVous.rendez_vous | orderBy:'HeureDebut'">				
 					<th>
-						{{rendezVous.HeureDebut}}-{{rendezVous.HeureFin}}
+						{{rdv.HeureDebut.substring(0,5)}}-{{rdv.HeureFin.substring(0,5)}}
 					</th>
 				</tr>
 		</table>
 	</div>
+	</div>
+	</form-element>
 	<form-element label="Choix des dates duppliquées">
 	<div class="row">
 		<div class="col-md-9">
-			<multiple-date-picker day-click="recupDate"/>
+			<multiple-date-picker day-click="recupDate" week-days-off="[0,6]" disable-days-before="today"/>
 		</div>
 	</div>
-	</form-element>
+	</form-element>	
 	</form>
 	</div>
 	
